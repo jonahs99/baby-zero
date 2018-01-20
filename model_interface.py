@@ -72,10 +72,10 @@ class ModelInterface:
                 self.model.optimizer.zero_grad()
                 output = self.model.net(Variable(data[0]))
                 loss = self.model.criterion(output, Variable(data[1]))
+                epoch_loss += loss.data[0]
                 loss.backward()
                 self.model.optimizer.step()
 
-                epoch_loss += loss.data[0]
                 batch_count += 1
             self.loss_history.append(epoch_loss / batch_count)
             if epoch % max(1, EPOCHS // 10) == 0:

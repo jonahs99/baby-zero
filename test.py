@@ -5,11 +5,16 @@ from connect4_model import Model
 from model_interface import ModelInterface
 from learned_mcts import LearnedMCTS
 
-pure = MCTS(Connect4State())
+from nash import NashState
+from nash_model import Model
+
+from nash import NashState
+
+p1 = MCTS(NashState())
 
 model = ModelInterface(Model())
-model.load_parameters('connect4')
-learned = LearnedMCTS(Connect4State, model)
+model.load_parameters('nash')
+p2 = LearnedMCTS(NashState, model)
 
 def play_against(a, b):
     while a.state.get_score() == -1:
@@ -20,4 +25,4 @@ def play_against(a, b):
         b.do_action(action)
         print(a.state)
 
-play_against(learned, pure)
+play_against(p1, p2)

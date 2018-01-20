@@ -1,12 +1,15 @@
-from connect4 import Connect4State
+#from connect4 import Connect4State
 from learned_mcts import LearnedMCTS
-from connect4_model import Model
+#from connect4_model import Model
 from model_interface import ModelInterface
 
-model = ModelInterface(Model())
-model.load_parameters('connect4')
+from nash import NashState
+from nash_model import Model
 
-mcts = LearnedMCTS(Connect4State, model)
+model = ModelInterface(Model())
+model.load_parameters('nash')
+
+mcts = LearnedMCTS(NashState, model)
 
 for game in range(2000):
     print('Starting game', game)
@@ -15,7 +18,7 @@ for game in range(2000):
     model.clear_training()
 
     while mcts.state.get_score() == -1:
-        mcts.think(0.5, max_its=1000)
+        mcts.think(max_time=5, max_its=10000)
         mcts.do_action(mcts.select_action())
         print(mcts.state)
 
