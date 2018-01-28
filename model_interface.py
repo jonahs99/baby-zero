@@ -39,7 +39,7 @@ class ModelInterface:
     def train(self):
         BATCH_SIZE = 32
         EPOCHS = 1
-        visit_threshold = 3
+        visit_threshold = 10
 
         n_data = len(self.train_data['inputs'])
 

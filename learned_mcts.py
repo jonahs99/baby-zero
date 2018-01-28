@@ -16,8 +16,8 @@ class LearnedMCTS:
         self.root = MCTSNode(None, None)
         self.pointer = self.root
 
-        self.c = 0.5
-        self.random_explore = 0.5
+        self.c = 1.414
+        self.rollout_coefficient = 0.5
     
     def reset(self):
         self.state = self.State()
@@ -78,10 +78,9 @@ class LearnedMCTS:
         if score != -1:
             return (score, self.state.turn)
         else:
-            if random.random() > self.random_explore:
-                return predict, self.state.turn
-            else:
-                return self._rollout()
+            rollout, rollturn = self._rollout()
+            rollout = rollout if rollturn == self.state.turn else (1 - rollout)
+            return (rollout * self.rollout_coefficient + predict * (1 - self.rollout_coefficient), self.state.turn)
 
     def _rollout(self):
         score = self.state.get_score()

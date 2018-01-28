@@ -1,20 +1,28 @@
 from state import State
 
-size = 9
+size = 7
 
 class NashState(State):
 
     # a set for each hex's neighbors
     # note: this is a board shaped like \\ not //
-    gen_connections = lambda size: [
+    connections = [
         { (nr*size + nc) for nr,nc in {(r,c+1),(r-1,c+1),(r-1,c),(r,c-1),(r+1,c-1),(r+1,c)} if 0 <= nr < size and 0 <= nc < size }
         for r in range(size) for c in range(size) ]
-    connections = gen_connections(size)
 
     left_edge = { (r * size) for r in range(size) }
     right_edge = { (r * size + size - 1) for r in range(size) }
     top_edge = { (c) for c in range(size) }
     bottom_edge = { (c + size * (size - 1)) for c in range(size) }
+
+    for i in left_edge:
+        connections[i].add(-1)
+    for i in right_edge:
+        connections[i].add(-2)
+    for i in top_edge:
+        connections[i].add(-3)
+    for i in bottom_edge:
+        connections[i].add(-4)
 
     symbols = ['-', 'X', 'O']
     letters = [ chr(i + ord('a')) for i in range(26) ]
@@ -26,7 +34,7 @@ class NashState(State):
         self.board = [0 for _ in range(self.size * self.size)]
         self.turn = 1
 
-        self.nodes = [[NashState.left_edge.copy(), NashState.right_edge.copy()], [NashState.top_edge.copy(), NashState.bottom_edge.copy()]]
+        self.nodes = [[], []]
     
     def gen_actions(self):
         return [ NashAction(i) for i in range(self.size ** 2) if self.board[i] == 0 ]
@@ -53,11 +61,10 @@ class NashState(State):
         self.nodes[self.turn - 1] = action.nodes
     
     def get_score(self):
-        end = size ** 2 - 1
-        if any((0 in node and end in node) for node in self.nodes[self.turn - 1]):
-            return 1
-        if any((0 in node and end in node) for node in self.nodes[2 - self.turn]):
-            return 0
+        if any((-1 in node and -2 in node) for node in self.nodes[0]):
+            return 1 if self.turn == 1 else 0
+        if any((-3 in node and -4 in node) for node in self.nodes[1]):
+            return 1 if self.turn == 2 else 0
         return -1
     
     def __repr__(self):

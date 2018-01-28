@@ -18,7 +18,7 @@ for game in range(2000):
     model.clear_training()
 
     while mcts.state.get_score() == -1:
-        mcts.think(max_time=5, max_its=10000)
+        mcts.think(max_time=1.5, max_its=1000)
         mcts.do_action(mcts.select_action())
         print(mcts.state)
 
