@@ -6,6 +6,8 @@ import torch.nn.functional as F
 from model_base import Model
 
 class Connect4Model(Model):
+    INPUT_SIZE = (2, 6, 7)
+
     def __init__(self):
         super().__init__(Net())
 
@@ -24,7 +26,7 @@ class Net(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(2, 8, 2)
         self.conv2 = nn.Conv2d(8, 4, 2)
-        self.head = nn.Linear(4 * 4 * 5, 7)
+        self.head = nn.Linear(4 * 4 * 5, 1)
 
     def forward(self, x):
         x = x.view(-1, 2, 6, 7)
