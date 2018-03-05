@@ -11,7 +11,7 @@ def self_play(index, model, eps, disp=False):
     mcts = MCTS(connect4.State(), model)
     mcts.eps = eps
     while not mcts.state.score()[1]:
-        for _ in range(400):
+        for _ in range(100):
             mcts.iterate()
         mcts.do_action(mcts.best_action())
         if disp:
@@ -96,14 +96,14 @@ def worker(args):
 
 def start():
     model = connect4.Model()
-    optimizer = optim.SGD(model.parameters(), lr=0.002)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
 
     loss_history = []
-    n_game_batch = 2
-    n_batches = 240
+    n_game_batch = 3
+    n_batches = 120
 
     eps_start = 1.0
-    eps_end = 0.05
+    eps_end = 1.0#0.05
     eps_decay = -math.log(eps_end / eps_start)
 
     for i in range(n_batches):

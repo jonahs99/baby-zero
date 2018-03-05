@@ -5,9 +5,10 @@ import random
 from torch.autograd import Variable
 import torch.utils.data as data_utils
 
+
 class Node:
     def __init__(self, parent, action, turn):
-        self.parent = parent    
+        self.parent = parent
         self.children = []
         self.action = action
         self.turn = turn
@@ -18,11 +19,12 @@ class Node:
         self.n = 0
         self.s = 0.0
         self.Q = 0.0
-    
+
     def UCT(self, logN):
         c = 1.414
-        return math.inf if self.n == 0 else (self.w / self.n + c * math.sqrt(logN / self.n))
-    
+        # We use (1.0-w) because this UCT is always from the perspective of one level above us (so the other turn)
+        return math.inf if self.n == 0 else ((1.0-self.w) / self.n + c * math.sqrt(logN / self.n))
+
     def flat(self):
         yield self
         for c in self.children:
@@ -33,6 +35,7 @@ class Node:
             return "a:%d w:%05d n:%05d s:%01d Q:%05f" % (self.action[0], self.w, self.n, self.s, self.Q)
         else:
             return "w:%05d n:%05d s:%01d Q:%05f" % (self.w, self.n, self.s, self.Q)
+
 
 class MCTS:
 
@@ -48,14 +51,14 @@ class MCTS:
         self.gamma = 0.99
 
         self.reset()
-    
+
     def reset(self):
         self.state.reset()
 
         self.root = Node(None, None, 1)
         self.head = self.root
         self.pointer = self.root
-    
+
     def iterate(self):
         self._select()
         self._expand()
@@ -63,8 +66,8 @@ class MCTS:
         assert(self.pointer == self.head)
 
     def best_action(self):
-        return max(self.pointer.children, key = lambda node: node.n).action
-    
+        return max(self.pointer.children, key=lambda node: node.n).action
+
     def do_action(self, action):
         self.state.do_action(action)
         for node in self.head.children:
@@ -76,19 +79,19 @@ class MCTS:
         self.head.children.append(node)
         self.head = node
         self.pointer = node
-    
+
     # descends the tree to a leaf node
     def _select(self):
         if len(self.pointer.children) == 0:
             return
         # select a node
         logN = math.log(self.head.n)
-        best = max(self.pointer.children, key = lambda node: node.UCT(logN))
+        best = max(self.pointer.children, key=lambda node: node.UCT(logN))
         # update the state and move the pointer to that node, then continue descent
         self.state.do_action(best.action)
         self.pointer = best
         self._select()
-    
+
     def _expand(self):
         _, terminal = self.state.score()
         if terminal:
@@ -96,7 +99,8 @@ class MCTS:
         if not self.pointer.n:
             self._evaluate()
         actions = self.state.actions()
-        self.pointer.children = list(map(lambda a: Node(self.pointer, a, self.state.turn), actions.nonzero()))
+        self.pointer.children = list(
+            map(lambda a: Node(self.pointer, a, self.state.turn), actions.nonzero()))
         choice = random.choice(self.pointer.children)
         self.state.do_action(choice.action)
         self.pointer = choice
@@ -107,7 +111,7 @@ class MCTS:
             return score
         action = random.choice(self.state.actions().nonzero())
         self.state.do_action(action)
-        return -self._rollout()
+        return 1.0 - self._rollout()
 
     def _evaluate(self):
         inputs = self.state.inputs()
@@ -119,11 +123,11 @@ class MCTS:
         rollout = self._rollout()
         self.state.restore()
         return rollout * self.eps + value * (1 - self.eps)
-    
+
     def _update(self, score):
         self.pointer.w += score
         self.pointer.n += 1
         if self.pointer != self.head:
             self.state.undo_action(self.pointer.action)
             self.pointer = self.pointer.parent
-            self._update(-score)
+            self._update(1.0-score)

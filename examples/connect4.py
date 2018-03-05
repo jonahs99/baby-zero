@@ -29,9 +29,9 @@ class State():
         lastc, lastr = self.last_piece[-1]
         for line in State.lines_by_square[lastc][lastr]:
             if all(self.planes[1 - self.turn, row, col] == 1 for col, row in line):
-                return 1.0, True
+                return 0.0, True
         if all(self.planes[0, 5, :] + self.planes[1, 5, :]):
-            return 0.0, True
+            return 0.5, True
         return 0.0, False
     
     def actions(self):
