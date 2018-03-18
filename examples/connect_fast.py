@@ -49,11 +49,13 @@ class State:
 		s += '0 1 2 3 4 5 6'
 		return s
 
-	def gen_moves(self):
+	def gen_actions(self):
 		empty = ~(self.players[0] | self.players[1])
+		actions = []
 		for i in range(7):
 			if empty & columns[i]:
-				yield i
+				actions.append(i)
+		return actions
 	
 	def make(self, move):
 		empty = ~(self.players[0] | self.players[1])
@@ -93,13 +95,13 @@ def perft(state, depth):
 		else:
 			count += 1
 	return count
-
+"""
 import random
 def rollout(state):
 	terminal, score = state.score()
 	if terminal:
 		return score
-	moves = list(state.gen_moves())
+	moves = list(state.gen())
 	rand_move = random.choice(moves)
 	state.make(rand_move)
 	return -rollout(state)
@@ -116,4 +118,4 @@ for i in range(100000):
 	else:
 		draw += 1
 
-print(x_win, y_win, draw)
+print(x_win, y_win, draw)"""

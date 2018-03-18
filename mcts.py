@@ -13,7 +13,7 @@ class MCTS:
 
         self.c = 2
     
-    def think(self, max_time=1, max_its=10000):
+    def think(self, max_time=1, max_its=100000):
         res = 10
         its = 0
         start_time = current_time()
@@ -34,7 +34,7 @@ class MCTS:
         return sorted(self.root.children, key = lambda node: node.n)[-1].action
     
     def do_action(self, action):
-        self.state.do_action(action)
+        self.state.make(action)
         match = list(filter(lambda node: node.action == action, self.root.children))
         if any(match):
             self.root = match[0]
@@ -49,33 +49,34 @@ class MCTS:
         if len(self.pointer.children) == 0:
             return
         best = sorted(self.pointer.children, key = lambda node: self._uct(node))[-1]
-        self.state.do_action(best.action)
+        self.state.make(best.action)
         self.pointer = best
         self._select()
 
     def _expand(self):
-        if self.state.get_score() != -1:
+        terminal, _ = self.state.score()
+        if terminal:
             return
         for action in self.state.gen_actions():
             self.pointer.add_child(action)
         self.pointer = random.choice(self.pointer.children)
-        self.state.do_action(self.pointer.action)
+        self.state.make(self.pointer.action)
 
     def _rollout(self):
-        score = self.state.get_score()
-        if score != -1:
+        terminal, score = self.state.score()
+        if terminal:
             return (score, self.state.turn)
         action = random.choice(self.state.gen_actions())
-        self.state.do_action(action)
+        self.state.make(action)
         score = self._rollout()
-        self.state.undo_action(action)
+        self.state.unmake(action)
         return score
 
     def _update(self, score, turn):
         self.pointer.w += 1 - score if self.state.turn == turn else score
         self.pointer.n += 1
         if self.pointer != self.root:
-            self.state.undo_action(self.pointer.action)
+            self.state.unmake(self.pointer.action)
             self.pointer = self.pointer.parent
             self._update(score, turn)
 

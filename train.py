@@ -100,7 +100,7 @@ def start():
 
     loss_history = []
     n_game_batch = 3
-    n_batches = 120
+    n_batches = 2
 
     eps_start = 1.0
     eps_end = 1.0#0.05
