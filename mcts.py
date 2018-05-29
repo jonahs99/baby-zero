@@ -13,7 +13,7 @@ class MCTS:
 
         self.c = 2
     
-    def think(self, max_time=1, max_its=100000):
+    def think(self, max_time=1, max_its=10000):
         res = 10
         its = 0
         start_time = current_time()
