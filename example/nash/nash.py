@@ -1,6 +1,6 @@
 from state import State
 
-size = 7
+size = 5
 
 class NashState(State):
 
@@ -24,7 +24,7 @@ class NashState(State):
     for i in bottom_edge:
         connections[i].add(-4)
 
-    symbols = ['-', 'X', 'O']
+    symbols = ['.', 'X', 'O']
     letters = [ chr(i + ord('a')) for i in range(26) ]
     numbers = [ str(i) for i in range(26) ]
 
